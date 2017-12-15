@@ -1,0 +1,71 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="introtext">Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext. Dit is de introtext.</string>
+
+    <string name="category_prompt">Select a category</string>
+    <string name="difficulty_prompt">Select a difficulty</string>
+    <string name="type_prompt">Select a type</string>
+    <string name="start">Start!</string>
+    <string name="question">Question:</string>
+    <string name="a">a:</string>
+    <string name="b">b:</string>
+    <string name="c">c:</string>
+    <string name="d">d:</string>
+    <string name="aradio">a</string>
+    <string name="bradio">b</string>
+    <string name="cradio">c</string>
+    <string name="dradio">d</string>
+    <string name="next">Next</string>
+
+    <string-array name="categories">
+        <item>Any Category</item>
+        <item>General Knowledge</item>
+        <item>Entertainment: Books</item>
+        <item>Entertainment: Film</item>
+        <item>Entertainment: Music</item>
+        <item>Entertainment: Musicals &amp; Theatres</item>
+        <item>Entertainment: Television</item>
+        <item>Entertainment: Video Games</item>
+        <item>Entertainment: Board Games</item>
+        <item>Science &amp; Nature</item>
+        <item>Science: Computers</item>
+        <item>Science: Mathematics</item>
+        <item>Mythology</item>
+        <item>Sports</item>
+        <item>Geography</item>
+        <item>History</item>
+        <item>Politics</item>
+        <item>Art</item>
+        <item>Celebrities</item>
+        <item>Animals</item>
+        <item>Vehicles</item>
+        <item>Entertainment: Comics</item>
+        <item>Science: Gadgets</item>
+        <item>Entertainment: Japanese Anime &amp; Manga</item>
+        <item>Entertainment: Cartoon &amp; Animations</item>
+    </string-array>
+
+    <string-array name="difficulties">
+        <item>any</item>
+        <item>easy</item>
+        <item>medium</item>
+        <item>hard</item>
+    </string-array>
+
+    <string-array name="types">
+        <item>any</item>
+        <item>multiple</item>
+        <item>boolean</item>
+    </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_sign_up">sign_up</string>
+    <string name="sign_up">Sign up</string>
+    <string name="e_mail">e-mail:</string>
+    <string name="your_email_adress">Your email adress</string>
+    <string name="password">password:</string>
+    <string name="password_hint">*******</string>
+    <string name="sign_me_up">Sign me up!</string>
+    <string name="log_out">Log out</string>
+</resources>
