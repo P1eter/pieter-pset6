@@ -10,4 +10,17 @@ With this app the user can play trivia against other users of the same app. Once
 See REVIEW.md
 
 ## Screenshots
-See the 'docs' folder.
+Also see the 'docs' folder.
+
+<table>
+  <tr>
+    <td>
+      <img src="https://github.com/P1eter/pieter-pset6/blob/master/doc/final_1.png?raw=true" width="300">
+      <img src="https://github.com/P1eter/pieter-pset6/blob/master/doc/final_2.png?raw=true" width="300">
+      <img src="https://github.com/P1eter/pieter-pset6/blob/master/doc/final_3.png?raw=true" width="300">
+      <img src="https://github.com/P1eter/pieter-pset6/blob/master/doc/final_4.png?raw=true" width="300">
+      <img src="https://github.com/P1eter/pieter-pset6/blob/master/doc/final_5.png?raw=true" width="300">
+      <img src="https://github.com/P1eter/pieter-pset6/blob/master/doc/final_6.png?raw=true" width="300">
+    </td>
+  </tr>
+</table>
