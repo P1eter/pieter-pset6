@@ -68,4 +68,8 @@
     <string name="password_hint">*******</string>
     <string name="sign_me_up">Sign me up!</string>
     <string name="log_out">Log out</string>
+    <string name="password_error">Password must be at least 6 characters!</string>
+    <string name="invalid_password_error">Incorrect password!</string>
+    <string name="general_error">Error while trying to sign you in!</string>
+    <string name="uninformed_error">Error!</string>
 </resources>

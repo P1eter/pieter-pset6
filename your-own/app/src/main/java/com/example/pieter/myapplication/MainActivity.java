@@ -2,9 +2,9 @@ package com.example.pieter.myapplication;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
+    int MIN_PASSWORD_LENGTH = 6;
 
     @Override
     public void onStart() {
@@ -56,24 +57,30 @@ public class MainActivity extends AppCompatActivity {
 
             //
             mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            String TAG = "log in";
-                            if (task.isSuccessful()) {
-                                // Sign in success, update UI with the signed-in user's information
-                                Log.d(TAG, "signInWithEmail:success");
-                                FirebaseUser user = mAuth.getCurrentUser();
-                                updateUI(user);
-                            } else {
-                                // If sign in fails, display a message to the user.
-                                Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                Toast.makeText(MainActivity.this, "Authentication failed.",
-                                        Toast.LENGTH_SHORT).show();
-                                updateUI(null);
-                            }
-                        }
-                    });
+                    .addOnCompleteListener(this, new logInListener());
+        }
+    }
+
+    /**
+     * Listener class that waits for the database to log the user in, and then updates the UI.
+     */
+    private class logInListener implements OnCompleteListener<AuthResult> {
+        @Override
+        public void onComplete(@NonNull Task<AuthResult> task) {
+            String TAG = "log in";
+
+            if (task.isSuccessful()) {
+                // Sign in success, update UI with the signed-in user's information
+                Log.d(TAG, "signInWithEmail:success");
+                FirebaseUser user = mAuth.getCurrentUser();
+                updateUI(user);
+            } else {
+                // If sign in fails, display a message to the user.
+                Log.w(TAG, "signInWithEmail:failure", task.getException());
+                Toast.makeText(MainActivity.this, "Authentication failed.",
+                Toast.LENGTH_SHORT).show();
+                updateUI(null);
+            }
         }
     }
 
@@ -91,35 +98,74 @@ public class MainActivity extends AppCompatActivity {
             final String password = emailAndPassword.password;
 
             mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            String TAG = "sign_up";
-                            if (task.isSuccessful()) {
-                                // Sign in success, update UI with the signed-in user's information
-                                Log.d(TAG, "createUserWithEmail:success");
-                                FirebaseUser user = mAuth.getCurrentUser();
-                                initUser();
-                                updateUI(user);
-                            } else {
-                                // If sign in fails, display a message to the user.
-                                Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                Toast.makeText(MainActivity.this, "Authentication failed.",
-                                        Toast.LENGTH_SHORT).show();
-                                updateUI(null);
-                            }
-                        }
-                    });
+                    .addOnCompleteListener(this, new signUpListener());
+        }
+    }
+
+    /**
+     * Listener class that waits for the database to sign up a new user, and then updates the UI.
+     */
+    private class signUpListener implements OnCompleteListener<AuthResult> {
+        @Override
+        public void onComplete(@NonNull Task<AuthResult> task) {
+            String TAG = "sign_up";
+            if (task.isSuccessful()) {
+                // Sign in success, update UI with the signed-in user's information
+                Log.d(TAG, "createUserWithEmail:success");
+                FirebaseUser user = mAuth.getCurrentUser();
+                initUser();
+                updateUI(user);
+            } else {
+                // If sign in fails, display a message to the user.
+                Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                Toast.makeText(MainActivity.this, "Authentication failed.",
+                        Toast.LENGTH_SHORT).show();
+                updateUI(null);
+            }
+        }
+    }
+
+    /**
+     * Initializes 'score' and 'name' fields in the database for a new user.
+     */
+    private void initUser() {
+        // get user id, user email and database reference
+        String user = mAuth.getCurrentUser().getUid();
+        String email = mAuth.getCurrentUser().getEmail();
+        DatabaseReference db = FirebaseDatabase.getInstance().getReference();
+
+        // initialize name and score in the database
+        db.child("userscores").child(user).child("score").setValue(0);
+        db.child("userscores").child(user).child("name").setValue(getNameFromEmail(email));
+    }
+
+    /**
+     * This function takes an email-address as input and returns the part before the '@'.
+     * @param email The email-address of the user.
+     * @return The part of the email-address before the '@'.
+     */
+    private String getNameFromEmail(String email) {
+        String name = "";
+
+        for (int i = 0; i < email.length(); i++) {
+            char letter = email.charAt(i);
+            if (letter != '@') {
+                name = name + email.charAt(i);
+            } else {
+                return name;
+            }
         }
 
+        // default name
+        return "Anonymous";
     }
 
-    private void initUser() {
-        String user = mAuth.getCurrentUser().getUid();
-        DatabaseReference db = FirebaseDatabase.getInstance().getReference();
-        db.child("userscores").child(user).child("score").setValue(0);
-    }
-
+    /**
+     * Gets the email and password from the EditTexts. Checks if the password is long
+     * enough (six characters).
+     * @return Tuple with the name and password from the input fields if the password is long
+     * enough, else returns 'null'.
+     */
     private tuple getEmailPassword() {
         EditText email_et = findViewById(R.id.email_login_et);
         EditText password_et = findViewById(R.id.password_login_et);
@@ -127,23 +173,18 @@ public class MainActivity extends AppCompatActivity {
         String email = email_et.getText().toString();
         String password = password_et.getText().toString();
 
-        if (password.length() >= 6) {
+        // check if password is long enough
+        if (password.length() >= MIN_PASSWORD_LENGTH) {
             return new tuple(email, password);
         } else {
             return null;
         }
     }
 
-    private class tuple {
-        private String email;
-        private String password;
-
-        public tuple(String email, String password) {
-            this.email = email;
-            this.password = password;
-        }
-    }
-
+    /**
+     * Updates the UI based on validity of the given 'currentUser'.
+     * @param currentUser The current user, null on error
+     */
     private void updateUI(FirebaseUser currentUser) {
         if (currentUser != null) {
             start_game();
@@ -152,31 +193,52 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Start a game of trivia in a new activity.
+     */
     public void start_game() {
         Intent intent = new Intent(this, home.class);
         startActivity(intent);
     }
 
+    /**
+     * Function to display an error in a specified TextField on the home screen.
+     * @param error String with the type of error.
+     */
     private void displayError(String error) {
         TextView error_tv = findViewById(R.id.error_msg_tv);
         error_tv.setTextColor(Color.RED);
 
-        System.out.println("THE-ERROR:" + error);
-
+        // set errortext based on given error
         switch (error) {
             case "passwordlength":
-                error_tv.setText("Password must be at least 6 characters!");
+                error_tv.setText(R.string.password_error);
                 break;
             case "wrongpassword":
-                error_tv.setText("Incorrect password!");
+                error_tv.setText(R.string.invalid_password_error);
                 break;
             case "signIn":
-                error_tv.setText("Error while trying to sign you in!");
+                error_tv.setText(R.string.general_error);
                 break;
             default:
-                error_tv.setText("Error!");
+                error_tv.setText(R.string.uninformed_error);
                 break;
         }
+
+        // make the TextView visible
         error_tv.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Class that can hold an email-password combination of a user.
+     */
+    private class tuple {
+        private String email;
+        private String password;
+
+        public tuple(String email, String password) {
+            this.email = email;
+            this.password = password;
+        }
     }
 }

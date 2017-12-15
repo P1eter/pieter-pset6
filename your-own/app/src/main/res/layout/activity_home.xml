@@ -2,6 +2,7 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/homescreen-layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.pieter.myapplication.home">
@@ -20,6 +21,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
+        android:id="@+id/linearLayout3"
         android:layout_width="match_parent"
         android:layout_height="215dp"
         android:layout_marginBottom="8dp"
@@ -119,5 +121,19 @@
             android:text="@string/log_out" />
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/leaderboard-button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:onClick="showLeaderboard"
+        android:text="Leaderboard"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/score-tv" />
 
 </android.support.constraint.ConstraintLayout>
