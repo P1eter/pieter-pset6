@@ -1,3 +1,11 @@
+/**
+ * Pieter Kronemeijer
+ * 11064838
+ *
+ * This is the home screen when logged in. From here the user can choose to view the leaderboard,
+ * play a game of trivia or log out. Question settings can be altered here as well.
+ */
+
 package com.example.pieter.myapplication;
 
 import android.content.Intent;

@@ -1,3 +1,11 @@
+/**
+ * Pieter Kronemeijer
+ * 11064838
+ *
+ * This is the activity where the game is played. The user can select an answer, which will turn
+ * either red or green depending on whether it is the wrong or correct answer, respectively.
+ */
+
 package com.example.pieter.myapplication;
 
 import android.content.Intent;

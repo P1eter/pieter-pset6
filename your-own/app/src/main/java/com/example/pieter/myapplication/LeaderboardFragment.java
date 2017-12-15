@@ -1,3 +1,10 @@
+/**
+ * Pieter Kronemeijer
+ * 11064838
+ *
+ * This fragment shows the leaderboard on top of the home screen.
+ */
+
 package com.example.pieter.myapplication;
 
 
