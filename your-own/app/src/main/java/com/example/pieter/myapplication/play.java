@@ -102,7 +102,17 @@ public class play extends AppCompatActivity {
         return -1;
     }
 
-    
+    /**
+     * OnClick function for 'next' button. Neccessary because getQuestion() can't accept a view.
+     * @param view Button that was pressed to trigger this function.
+     */
+    public void goToNextQuestion(View view) {
+        getQuestion();
+    }
+
+    /**
+     * Request a question from the trivia api.
+     */
     private void getQuestion() {
         String url = getLink();
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -116,6 +126,10 @@ public class play extends AppCompatActivity {
         queue.add(stringRequest);
     }
 
+    /**
+     * Build the api url with the category, difficulty and type that the user selected.
+     * @return Callable api url.
+     */
     private String getLink() {
         String url = "https://opentdb.com/api.php?amount=1";
 
@@ -132,10 +146,10 @@ public class play extends AppCompatActivity {
         return url;
     }
 
-    public void goToNextQuestion(View view) {
-        getQuestion();
-    }
-
+    /**
+     * Response listener class for the getQuestion function. Parses response and then sets the
+     * adapter accordingly.
+     */
     private class responseListener implements Response.Listener<String> {
         @Override
         public void onResponse(String response) {
@@ -144,8 +158,11 @@ public class play extends AppCompatActivity {
         }
     }
 
+    /**
+     * Error listener class for the getQuestion function. Sets the adapter with the "Error!" string
+     * to signal the user something went wrong. Possibly the phone has no internet.
+     */
     private class errorListener implements Response.ErrorListener {
-
         @Override
         public void onErrorResponse(VolleyError error) {
             String error_string = "Error!";
@@ -153,6 +170,11 @@ public class play extends AppCompatActivity {
         }
     }
 
+    /**
+     * This function parses a JSON response that the api sends.
+     * @param response JSON string with response from api.
+     * @return Tuple with the question, the correct answer and the incorrect answers.
+     */
     private tuple parseJson(String response) {
         // initialize return object
         String question = "";
@@ -161,6 +183,7 @@ public class play extends AppCompatActivity {
         try {
             JSONObject theResponse = new JSONObject(response);
             int returnvalue = theResponse.getInt("response_code");
+
             switch (returnvalue) {
                 case 0:
                     // request always contains only one element, at index 0 (due to unique TOKEN of the api)
@@ -176,42 +199,73 @@ public class play extends AppCompatActivity {
                     break;
             }
         } catch (JSONException e) {
+            // set error text
             question = "Error!";
         }
+
         return new tuple(question, wrong_answers, correct_answer);
     }
 
+    /**
+     * This function sets the adapter for the listview of the question and answers.
+     * @param question Tuple containing the question, wrong answers and the correct answer.
+     */
     private void setAdapter(tuple question) {
+        // extract all the answers and put them in one big list
         questions = question.wrong_answers;
         questions.add(question.correct_answer);
+
+        // shuffle the answer options so the correct answer isn't always at the same location
+        // in the list
         java.util.Collections.shuffle(questions);
 
+        // create ArrayAdapter for the questions
         ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, questions);
+
+        // get the answers listview and set adapter and onItemClickListener
         ListView answers_lv = findViewById(R.id.answers_lv);
         answers_lv.setAdapter(adapter);
         answers_lv.setOnItemClickListener(new answerQuestionClickListener());
 
+        // set the question in the TextView
         TextView questiontv = this.findViewById(R.id.question_tv);
         questiontv.setText(question.question);
 
+        // hide 'next' button so the question can't be skipped
         setNextButtonVisibility(false);
 
+        // save current question, so it can be requested again when the app closes
         storeCurrentQuestion(question);
     }
 
+    /**
+     * This function saves the current question in shared preferences so it can be reinstantiated
+     * once the app closes and opens again.
+     * @param question
+     */
     private void storeCurrentQuestion(tuple question) {
         SharedPreferences prefs = getSharedPreferences("question", this.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
+
+        // remove the previous question from the sharedpreferences
         editor.clear();
 
+        // add correct answer
         editor.putString("correct_answer", question.correct_answer);
 
+        // add wrong answers
         for (int i = 0; i < question.wrong_answers.size(); i++) {
             editor.putString("wrong_answer_" + i, question.wrong_answers.get(i));
         }
+
         editor.commit();
     }
 
+    /**
+     * Click listener class for the answers listview. If the correct answer is selected, the
+     * background of that answer is set to green. If not, then the background is set to red and
+     * the background of the correct answer is set to green.
+     */
     private class answerQuestionClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -220,6 +274,7 @@ public class play extends AppCompatActivity {
             String correct_answer = prefs.getString("correct_answer", null);
             String selected_answer = adapterView.getItemAtPosition(i).toString();
 
+            // check if answer is correct and act accordingly
             if (selected_answer.equals(correct_answer)) {
                 view.setBackgroundColor(Color.GREEN);
                 incrementScore();
@@ -228,32 +283,51 @@ public class play extends AppCompatActivity {
                 setColorCorrectAnswer(correct_answer);
             }
 
+            // reveal next-button to go to the next question
             setNextButtonVisibility(true);
         }
     }
 
+    /**
+     * Add points to the score of the user.
+     */
     private void incrementScore() {
-        final String user = mAuth.getCurrentUser().getUid();
-
-        ValueEventListener getCurrentScoreListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                int good_answer_score = 1;
-                int current_score = dataSnapshot.child("userscores").child(user).child("score").getValue(Integer.class);
-                mDatabase.child("userscores").child(user).child("score").setValue(current_score + good_answer_score);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-
+        ValueEventListener getCurrentScoreListener = new incrementScoreListener();
         mDatabase.addListenerForSingleValueEvent(getCurrentScoreListener);
     }
 
+    /**
+     * Listener class for that gets a snapshot of the current user in the database and adds
+     * one point to his/her score.
+     */
+    private class incrementScoreListener implements ValueEventListener {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // score for a good answer
+            int good_answer_score = 1;
+            final String user = mAuth.getCurrentUser().getUid();
+
+            // get current score
+            int current_score = dataSnapshot.child("userscores").child(user).child("score").getValue(Integer.class);
+
+            // store new score
+            mDatabase.child("userscores").child(user).child("score").setValue(current_score + good_answer_score);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            System.out.println("Cancelled database request!");
+        }
+    }
+
+    /**
+     * This function sets the color of the view of the correct answer to green.
+     * @param correct_answer String containing the correct answer.
+     */
     private void setColorCorrectAnswer(String correct_answer) {
         ListView answers_lv = findViewById(R.id.answers_lv);
+
+        // loop over all childs of the listview until the correct answer is found
         for (int child_index = 0; child_index < answers_lv.getChildCount(); child_index++) {
             if (answers_lv.getItemAtPosition(child_index).toString().equals(correct_answer)) {
                 answers_lv.getChildAt(child_index).setBackgroundColor(Color.GREEN);
@@ -261,11 +335,16 @@ public class play extends AppCompatActivity {
         }
     }
 
+    /**
+     * Make the 'next' button either visible or invisible for the user.
+     * @param visible Boolean, true equals make visible, false means make invisible.
+     */
     private void setNextButtonVisibility(boolean visible) {
-        // Make the 'next button' visible, so the user has time to look at
+        // make the 'next button' visible, so the user has time to look at
         // what the correct answer was.
         Button next_button = findViewById(R.id.next_button);
 
+        // set visibility
         if (visible) {
             next_button.setVisibility(View.VISIBLE);
         } else {
@@ -273,16 +352,13 @@ public class play extends AppCompatActivity {
         }
     }
 
+    /**
+     * Class that can hold a question, wrong answers to that question and the correct answer.
+     */
     private class tuple {
         private String question;
         private ArrayList<String> wrong_answers;
         private String correct_answer;
-
-        public tuple() {
-            question = "";
-            wrong_answers = new ArrayList<>();
-            correct_answer = "";
-        }
 
         public tuple(String question, ArrayList<String> wrong_answers, String correct_answer) {
             this.question = question;
