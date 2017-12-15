@@ -47,33 +47,52 @@ public class play extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
+        // set global parameters about the type of question (category, difficulty and type)
         setQuestionType();
 
-        // Request a question from the api and set
+        // Request a question from the api and set it in the listview
         getQuestion();
     }
 
+    /**
+     * This function parses and maps the data given by the spinners that the user set about
+     * the preferred category, difficulty and type of the questions.
+     */
     private void setQuestionType() {
         Intent intent = getIntent();
 
+        // difficulty and type have can be mapped to the url-parameters directly
         difficulty = intent.getStringExtra("difficulty");
         type = intent.getStringExtra("type");
 
+        // the string categories have to be mapped to an integer (as string) or the string "any"
+        // when no category is specified.
         String category_str = intent.getStringExtra("category");
         if (category_str.equals("any")) {
             category = "any";
         } else {
+            // starting value of all categories (the first one is 8, second one 9 etc.)
             int category_basevalue = 8;
             String[] categories = getResources().getStringArray(R.array.categories);
+
+            // get index of category from string-array resources
             int category_value = getIndexOfElement(categories, category_str) + category_basevalue;
+
             if (category_value > category_basevalue) {
                 category = Integer.toString(category_value);
             } else {
+                // when something goes wrong, choose 'any' (should never happen)
                 category = "any";
             }
         }
     }
 
+    /**
+     * Function to get the index of an element in an array.
+     * @param array Array to search in.
+     * @param element Element to look for in the array.
+     * @return Index of the element in the array, -1 if it doesn't exist.
+     */
     private int getIndexOfElement(String[] array, String element) {
         for (int i = 0; i < array.length; i++) {
             if (array[i].equals(element)) {
@@ -83,6 +102,7 @@ public class play extends AppCompatActivity {
         return -1;
     }
 
+    
     private void getQuestion() {
         String url = getLink();
         RequestQueue queue = Volley.newRequestQueue(this);
