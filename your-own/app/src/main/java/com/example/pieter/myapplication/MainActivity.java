@@ -4,6 +4,7 @@
  *
  * This is the login activity, and the first one that is entered after startup. Here the user can
  * log in of sign up for an account.
+ *
  */
 
 package com.example.pieter.myapplication;
